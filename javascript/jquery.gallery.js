@@ -568,7 +568,7 @@
                 "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
                 "-webkit-transform": horizontal ?
                     ("translate3d(" + newMargin + ", 0, 0)") :
-                    ("translate3d(0, " + newMargin + ", 0)") });
+                    ("translate3d(0, " + newMargin + ", 0)") }).css('marginLeft', newMargin);
 			//$(self.gallery).css('marginLeft', newMargin);
 		}
 		
