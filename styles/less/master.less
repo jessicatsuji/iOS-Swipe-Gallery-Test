@@ -1,0 +1,140 @@
+@charset "utf-8";
+/* !RESET */
+/* http://meyerweb.com/eric/tools/css/reset/
+ * v2.0 | 20110126
+ * License: none (public domain)
+ */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* !MASTER STYLES */
+/* Author: Kellan Craddock
+ * Email: kcraddock@cmdagency.com
+ */
+ 
+/* !VARS */
+@link-color: #2a85dd;
+ 
+/* !GLOBAL */
+
+.rounded-corners(@radius1: 5px, @radius2: 5px, @radius3: 5px, @radius4: 5px) {
+	-moz-border-radius: @radius1 @radius2 @radius3 @radius4;
+	-webkit-border-radius: @radius1 @radius2 @radius3 @radius4;
+	border-radius: @radius1 @radius2 @radius3 @radius4;
+}
+
+.linear-gradient(@from: #cccccc, @to: #000000) {
+	background: @from;
+	background: -webkit-gradient(linear, left top, left bottom, from(@from), to(@to));
+	background: -moz-linear-gradient(top,  @from,  @to);
+}
+
+.drop-shadow(@ho: 0px, @vo: 2px, @blur: 2px, @color: #999999) {
+	-moz-box-shadow: @ho, @vo, @blur @color;
+	-webkit-box-shadow: @ho, @vo, @blur @color;
+	box-shadow: @ho, @vo, @blur @color;
+}
+
+.text-shadow(@x: 0px, @y: 0px, @blur: 2px, @color: #2E2E2E) {
+	text-shadow: @x @y @blur @color;
+}
+
+/* !Text */
+body {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 12px;
+	color: #555555;
+}
+
+p {
+	line-height: 16px;
+	margin-bottom: 10px;
+}
+
+/* !Links */
+a {
+	text-decoration: none;
+	color: @link-color;
+}
+
+/* !Buttons */
+.button, {
+	border: 2px solid #ccc;
+	display: block;
+	float: left;
+	.rounded-corners(5px, 5px, 5px, 5px);
+	.linear-gradient(#fff, #F0F0F0);
+	padding: 6px 14px;
+	font-weight: bold;
+	.text-shadow(0px 1px 1px #BDBDBD);
+	&:hover {
+		border: 2px solid #fff;
+		color: #fff;
+		.linear-gradient(#5c78a0, #0f3f5b);
+	}
+}
+
+/* !SECTIONS */
+li {
+	width: 980px;
+	height: 768px;
+	float: left;
+	overflow: hidden;
+}
+
+/* !CLEARFIX */
+[selector]:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+/* IE6 */ 
+* html [selector] {
+	height: 1%;
+}/* IE7 */
+*:first-child+html [selector] {
+	min-height: 1px;
+}

@@ -1,0 +1,190 @@
+@charset "utf-8";
+/* !RESET */
+/* http://meyerweb.com/eric/tools/css/reset/
+ * v2.0 | 20110126
+ * License: none (public domain)
+ */
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+/* !MASTER STYLES */
+/* Author: Kellan Craddock
+ * Email: kcraddock@cmdagency.com
+ */
+/* !VARS */
+/* !GLOBAL */
+/* !Text */
+body {
+  font-family: Verdana, Arial, sans-serif;
+  font-size: 12px;
+  color: #555555;
+}
+p {
+  line-height: 16px;
+  margin-bottom: 10px;
+}
+/* !Links */
+a {
+  text-decoration: none;
+  color: #2a85dd;
+}
+/* !Buttons */
+.button {
+  border: 2px solid #ccc;
+  display: block;
+  float: left;
+  -moz-border-radius: 5px 5px 5px 5px;
+  -webkit-border-radius: 5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+  background: #ffffff;
+  background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f0f0f0));
+  background: -moz-linear-gradient(top, #ffffff, #f0f0f0);
+  padding: 6px 14px;
+  font-weight: bold;
+  text-shadow: 0px 1px 1px #bdbdbd 0px 2px #2e2e2e;
+}
+.button:hover {
+  border: 2px solid #fff;
+  color: #fff;
+  background: #5c78a0;
+  background: -webkit-gradient(linear, left top, left bottom, from(#5c78a0), to(#0f3f5b));
+  background: -moz-linear-gradient(top, #5c78a0, #0f3f5b);
+}
+/* !SECTIONS */
+li {
+  width: 980px;
+  height: 768px;
+  float: left;
+  overflow: hidden;
+}
+/* !CLEARFIX */
+[selector]:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+/* IE6 */* html [selector] {
+  height: 1%;
+}
+/* IE7 */
+*:first-child + html [selector] {
+  min-height: 1px;
+}
