@@ -529,27 +529,17 @@
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
 				e.preventDefault();
 				//Set event, either mouse or touch
-				var event = (e.originalEvent.touches[0] == 1) ? e.originalEvent.touches[0] : e;
-            	/*
-if (e.originalEvent.touches.length) {
-            		var initMousePos = e.originalEvent.touches[0].clientX;
-            	} else {
-            		var initMousePos = e.pageX;
-            	}
-*/
-            	var initMousePos = event.clientX;
+				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
+
+            	var initMousePos = event.pageX;
 				var initGalleryMargin = 1 * $(self.gallery).css('marginLeft').replace('px', '');
-				
+
 				//Set the cursor				
 				$(self.options.items, self.gallery).css('cursor', 'move');
 				
 				$(self.gallery).bind('mousemove touchmove', function(e) {
-					if (e.originalEvent.touches.length) {
-            			var margin = e.originalEvent.touches[0].clientX - initMousePos;
-	            	} else {
-	            		var margin = e.pageX - initMousePos;
-	            	}
-					
+					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
+					var margin = event.pageX - initMousePos;
 					self.drag(initGalleryMargin, margin);
 				});
 				
