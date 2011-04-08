@@ -528,11 +528,16 @@
 			
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
 				e.preventDefault();
-            	if (e.originalEvent.touches.length) {
+				//Set event, either mouse or touch
+				var event = (e.originalEvent.touches[0] == 1) ? e.originalEvent.touches[0] : e;
+            	/*
+if (e.originalEvent.touches.length) {
             		var initMousePos = e.originalEvent.touches[0].clientX;
             	} else {
             		var initMousePos = e.pageX;
             	}
+*/
+            	var initMousePos = event.clientX;
 				var initGalleryMargin = 1 * $(self.gallery).css('marginLeft').replace('px', '');
 				
 				//Set the cursor				
