@@ -553,6 +553,9 @@
 		//drag- starts drag functionality via css left margin
 		this.drag = function(initGalleryMargin, margin) {
 			//Move the gallery based on the mouse pos
+			var duration = 0;
+			var horizontal = true;
+                    
 			var newMargin;
 			if (margin > 0) {
 				newMargin = (initGalleryMargin + margin) + 'px';
@@ -561,7 +564,12 @@
 			} else {
 				newMargin = "-" + Math.abs(initGalleryMargin + margin) + 'px';
 			}
-			$(self.gallery).css('marginLeft', newMargin);
+			$(self.gallery).css({
+                "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
+                "-webkit-transform": horizontal ?
+                    ("translate3d(" + newMargin + ", 0, 0)") :
+                    ("translate3d(0, " + newMargin + ", 0)") });
+			//$(self.gallery).css('marginLeft', newMargin);
 		}
 		
 		this.itemRemove = function(item, animate) {
