@@ -378,7 +378,11 @@
 			if (self.options.animate) {
 				
 				if(self.options.direction == 'horizontal') {
-					self.slideLeft(self.options.itemsOffset, animate);
+					var margin = _calcElementMargin(element);
+					console.log('margin: ' + margin);
+					var newMargin = _calcGalleryMargin(0, margin);
+					console.log('new gallery margin: ' + newMargin);
+					//self.slideLeft(newMargin, animate);
 				} else if(self.options.direction == 'vertical') {
 					self.slideDown(self.options.itemsOffset, animate);
 				}
@@ -420,6 +424,8 @@
 			var items;
 			var margin;
 			var prevItems = $(' .active', self.gallery).prevAll(self.options.items).length;
+			var duration = 0;
+			var horizontal = true;
 			
 			if (offset) {
 				margin = (prevItems - offset) * $(self.options.items, self.gallery).eq(0).outerWidth(true);
@@ -430,7 +436,7 @@
 			} else {
 				margin = '+' + Math.abs(margin) + 'px';
 			}
-			
+					
 			//If set to animate
 			if (animate) {
 				//Animate the gallery items	
@@ -459,6 +465,16 @@
 			} else {
 				self.galleryWrapper.css({width: self.viewBoxWidth + 'px'});
 				$(self.gallery).css({marginLeft: margin});
+
+				if ($(self.gallery).css('-webkit-transform') === '') { //If we are not in webkit, then rest the gallery margin manually
+					$(self.gallery).css('marginLeft', newMargin);
+				} else {
+					$(self.gallery).css({ //Else use webkit transform
+	                "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
+	                "-webkit-transform": horizontal ?
+	                    ("translate3d(" + newMargin + ", 0, 0)") :
+	                    ("translate3d(0, " + newMargin + ", 0)") });
+				}
 			}
 				
 		}
@@ -525,24 +541,25 @@
 		this.setDraggable = function() {
 			 //Setup default states
 			var defaultCursor = $(self.options.items, self.gallery).css('cursor');
+			var newGalleryMargin;
 			
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
 				e.preventDefault();
 				//Set event, either mouse or touch
 				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
-
+				var initGalleryMargin = (newGalleryMargin == undefined) ? (1 * $(self.gallery).css('marginLeft').replace('px', '')) : (1 * newGalleryMargin.replace('px', '')); //Initial gallery position
+				//Initial mouse or touch position
             	var initMousePos = event.pageX;
-				var initGalleryMargin = 1 * $(self.gallery).css('marginLeft').replace('px', '');
-
 				//Set the cursor				
 				$(self.options.items, self.gallery).css('cursor', 'move');
-				
+				//Bind to mouse move or touchmove
 				$(self.gallery).bind('mousemove touchmove', function(e) {
 					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
-					var margin = event.pageX - initMousePos;
-					self.drag(initGalleryMargin, margin);
+					var pointerPos = event.pageX - initMousePos;
+					newGalleryMargin = _calcGalleryMargin(initGalleryMargin, pointerPos);
+					self.drag(newGalleryMargin);
 				});
-				
+				//Bind to mouseup or touchend
 				$('html').bind('mouseup touchend', function() {
 					$(self.gallery).unbind('mousemove touchmove');
 					$(self.options.items, self.gallery).css('cursor', defaultCursor);
@@ -550,26 +567,23 @@
 			});
 		}
 		
+		
+		
 		//drag- starts drag functionality via css left margin
-		this.drag = function(initGalleryMargin, margin) {
+		this.drag = function(newMargin) {
 			//Move the gallery based on the mouse pos
 			var duration = 0;
 			var horizontal = true;
-                    
-			var newMargin;
-			if (margin > 0) {
-				newMargin = (initGalleryMargin + margin) + 'px';
-			} else if ( initGalleryMargin >= 0 ) {
-				newMargin = (initGalleryMargin + margin) + 'px';
+			
+			if ($(self.gallery).css('-webkit-transform') === '') { //If we are not in webkit, then rest the gallery margin manually
+				$(self.gallery).css('marginLeft', newMargin);
 			} else {
-				newMargin = "-" + Math.abs(initGalleryMargin + margin) + 'px';
-			}
-			$(self.gallery).css({
+				$(self.gallery).css({ //Else use webkit transform
                 "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
                 "-webkit-transform": horizontal ?
                     ("translate3d(" + newMargin + ", 0, 0)") :
-                    ("translate3d(0, " + newMargin + ", 0)") }).css('marginLeft', newMargin);
-			//$(self.gallery).css('marginLeft', newMargin);
+                    ("translate3d(0, " + newMargin + ", 0)") });
+			}
 		}
 		
 		this.itemRemove = function(item, animate) {
@@ -605,6 +619,54 @@
 				//Fire onItemRemoved callback
 				self.options.onItemRemoved(location, self.gallery);
 			}
+		}
+		
+		//Calculates the new gallery margin based on the galleries current position and a margin param
+		var _calcGalleryMargin = function(initGalleryMargin, pointerPos) {
+			
+			var newMargin; //The new margin to return
+			console.log(initGalleryMargin);
+/*
+			if (pointerPos > 0) {
+				newMargin = (initGalleryMargin + pointerPos) + 'px';
+			} else if ( initGalleryMargin >= 0 ) {
+				newMargin = (initGalleryMargin + pointerPos) + 'px';
+			} else {
+				newMargin = "-" + Math.abs(initGalleryMargin + pointerPos) + 'px';
+			}
+*/			if (pointerPos > 0) {
+				newMargin = (initGalleryMargin + pointerPos) + 'px';
+			} else if ( initGalleryMargin >= 0 ) {
+				newMargin = (initGalleryMargin + pointerPos) + 'px';
+			} else {
+				newMargin = "-" + Math.abs(initGalleryMargin + pointerPos) + 'px';
+			}
+			console.log(newMargin);
+			return newMargin;
+		}
+		
+		//Calculates the elements left margin based on its position realitive to its siblings
+		var _calcElementMargin = function(element) {
+			var margin = 0;
+			var prevItems = $(' .active', self.gallery).prevAll(self.options.items).length;
+			var offset = self.options.itemsOffset;
+			
+			var prevItemsTotal = prevItems.length;
+			prevItemsTotal = (offset > 0) ? prevItemsTotal - offset : prevItemsTotal;
+			
+			$.each(prevItems, function(index, item) {
+				if (index < prevItemsTotal) {
+					//get width
+					margin += $(self.options.items, self.gallery).eq(index).outerWidth(true);
+				}
+			});
+			
+			if (margin > 0) {
+				margin = '-' + Math.abs(margin);
+			} else {
+				margin = Math.abs(margin);
+			}
+			return margin;
 		}
 		
 		//Set the instance to the elements data
