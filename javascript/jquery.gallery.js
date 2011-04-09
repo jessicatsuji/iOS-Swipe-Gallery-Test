@@ -376,13 +376,10 @@
 			
 			//Check for option to animate gallery
 			if (self.options.animate) {
-				
 				if(self.options.direction == 'horizontal') {
 					var margin = _calcElementMargin(element);
-					console.log('margin: ' + margin);
 					var newMargin = _calcGalleryMargin(0, margin);
-					console.log('new gallery margin: ' + newMargin);
-					//self.slideLeft(newMargin, animate);
+					self.slideHorizontal(newMargin, animate);
 				} else if(self.options.direction == 'vertical') {
 					self.slideDown(self.options.itemsOffset, animate);
 				}
@@ -419,14 +416,15 @@
 			$(self.options.controls.prev + ', ' + self.options.controls.next).addClass('disabled');
 		}
 		
-		//slideLeft- slides to the currently active item
-		this.slideLeft = function(offset, animate) {
-			var items;
-			var margin;
-			var prevItems = $(' .active', self.gallery).prevAll(self.options.items).length;
+		//slideHorizontal- slides to the currently active item
+		this.slideHorizontal = function(margin, animate) {
+/* 			var items; */
+/* 			var margin; */
+			/* var prevItems = $(' .active', self.gallery).prevAll(self.options.items).length; */
 			var duration = 0;
 			var horizontal = true;
 			
+/*
 			if (offset) {
 				margin = (prevItems - offset) * $(self.options.items, self.gallery).eq(0).outerWidth(true);
 			} else {
@@ -436,7 +434,8 @@
 			} else {
 				margin = '+' + Math.abs(margin) + 'px';
 			}
-					
+			
+*/		
 			//If set to animate
 			if (animate) {
 				//Animate the gallery items	
@@ -464,22 +463,21 @@
 			//Else simply set css margin left
 			} else {
 				self.galleryWrapper.css({width: self.viewBoxWidth + 'px'});
-				$(self.gallery).css({marginLeft: margin});
-
+				
 				if ($(self.gallery).css('-webkit-transform') === '') { //If we are not in webkit, then rest the gallery margin manually
-					$(self.gallery).css('marginLeft', newMargin);
+					$(self.gallery).css('marginLeft', margin);
 				} else {
 					$(self.gallery).css({ //Else use webkit transform
 	                "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
 	                "-webkit-transform": horizontal ?
-	                    ("translate3d(" + newMargin + ", 0, 0)") :
-	                    ("translate3d(0, " + newMargin + ", 0)") });
+	                    ("translate3d(" + margin + ", 0, 0)") :
+	                    ("translate3d(0, " + margin + ", 0)") });
 				}
 			}
 				
 		}
 		
-		//slideLeft- slides to the currently active item
+		//slideVertical- slides to the currently active item
 		this.slideDown = function(offset, animate) {
 			var items;
 			var margin = 0;
@@ -539,7 +537,7 @@
 		
 		//setDraggable- binds all dragging functionality
 		this.setDraggable = function() {
-			 //Setup default states
+			//Setup default states
 			var defaultCursor = $(self.options.items, self.gallery).css('cursor');
 			var newGalleryMargin;
 			
@@ -547,6 +545,7 @@
 				e.preventDefault();
 				//Set event, either mouse or touch
 				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
+				//on mousedown, set the initial gallery margin by checking if the new gallery margin has been already set. if not, set it to whatever the margin left is, which should be 0 initially.
 				var initGalleryMargin = (newGalleryMargin == undefined) ? (1 * $(self.gallery).css('marginLeft').replace('px', '')) : (1 * newGalleryMargin.replace('px', '')); //Initial gallery position
 				//Initial mouse or touch position
             	var initMousePos = event.pageX;
@@ -557,7 +556,7 @@
 					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 					var pointerPos = event.pageX - initMousePos;
 					newGalleryMargin = _calcGalleryMargin(initGalleryMargin, pointerPos);
-					self.drag(newGalleryMargin);
+					self.slideHorizontal(newGalleryMargin, false);
 				});
 				//Bind to mouseup or touchend
 				$('html').bind('mouseup touchend', function() {
@@ -565,25 +564,6 @@
 					$(self.options.items, self.gallery).css('cursor', defaultCursor);
 				});
 			});
-		}
-		
-		
-		
-		//drag- starts drag functionality via css left margin
-		this.drag = function(newMargin) {
-			//Move the gallery based on the mouse pos
-			var duration = 0;
-			var horizontal = true;
-			
-			if ($(self.gallery).css('-webkit-transform') === '') { //If we are not in webkit, then rest the gallery margin manually
-				$(self.gallery).css('marginLeft', newMargin);
-			} else {
-				$(self.gallery).css({ //Else use webkit transform
-                "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
-                "-webkit-transform": horizontal ?
-                    ("translate3d(" + newMargin + ", 0, 0)") :
-                    ("translate3d(0, " + newMargin + ", 0)") });
-			}
 		}
 		
 		this.itemRemove = function(item, animate) {
@@ -625,7 +605,6 @@
 		var _calcGalleryMargin = function(initGalleryMargin, pointerPos) {
 			
 			var newMargin; //The new margin to return
-			console.log(initGalleryMargin);
 /*
 			if (pointerPos > 0) {
 				newMargin = (initGalleryMargin + pointerPos) + 'px';
@@ -641,14 +620,13 @@
 			} else {
 				newMargin = "-" + Math.abs(initGalleryMargin + pointerPos) + 'px';
 			}
-			console.log(newMargin);
 			return newMargin;
 		}
 		
 		//Calculates the elements left margin based on its position realitive to its siblings
 		var _calcElementMargin = function(element) {
 			var margin = 0;
-			var prevItems = $(' .active', self.gallery).prevAll(self.options.items).length;
+			var prevItems = $(' .active', self.gallery).prevAll(self.options.items);
 			var offset = self.options.itemsOffset;
 			
 			var prevItemsTotal = prevItems.length;
@@ -662,10 +640,11 @@
 			});
 			
 			if (margin > 0) {
-				margin = '-' + Math.abs(margin);
+				margin = '-1' * Math.abs(margin);
 			} else {
 				margin = Math.abs(margin);
 			}
+			
 			return margin;
 		}
 		
