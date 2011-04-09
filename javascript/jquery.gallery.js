@@ -341,7 +341,6 @@
 		//moveTo method- resets the active item. Takes an object, number, or 'next' & 'back'
 		this.moveTo = function(item, animate) {
 			var animate = (animate == undefined) ? true : animate;
-			//console.log(animate);
 			var element;
 			switch(typeof(item)){
 				case 'object':
@@ -351,12 +350,12 @@
 				  element = $(self.options.items, self.gallery).eq((item - 1));
 				  break;
 				case 'string':
-				  self.options.controls.count = (typeof(self.options.controls.count)=='number') ? self.options.controls.count : 1;
+				  var controlsCount = (self.options.controls) ? self.options.controls.count : 1;
 				  if (item == 'next') {	
-				  	newIndex = $(self.options.items+'.active', self.gallery).prevAll().andSelf().length + (self.options.controls.count-1);
+				  	newIndex = $(self.options.items+'.active', self.gallery).prevAll().andSelf().length + (controlsCount-1);
 				  	element = ($(self.options.items+'.active', self.gallery).next(self.options.items).length > 0 && $(self.options.items, self.gallery).eq(newIndex).length > 0) ? $(self.options.items, self.gallery).eq(newIndex) : false;
 				  } else if (item == 'back') {
-				  	newIndex = $(self.options.items+'.active', self.gallery).prevAll().andSelf().length - (self.options.controls.count+1);
+				  	newIndex = $(self.options.items+'.active', self.gallery).prevAll().andSelf().length - (controlsCount+1);
 				  	element = ($(self.options.items+'.active', self.gallery).prev(self.options.items).length > 0) ? $(self.options.items, self.gallery).eq(newIndex) : false;
 				  }
 				  break;
@@ -418,24 +417,9 @@
 		
 		//slideHorizontal- slides to the currently active item
 		this.slideHorizontal = function(margin, animate) {
-/* 			var items; */
-/* 			var margin; */
-			/* var prevItems = $(' .active', self.gallery).prevAll(self.options.items).length; */
 			var duration = 0;
 			var horizontal = true;
-			
-/*
-			if (offset) {
-				margin = (prevItems - offset) * $(self.options.items, self.gallery).eq(0).outerWidth(true);
-			} else {
-				margin = prevItems * $(self.options.items, self.gallery).eq(0).outerWidth(true);
-			} if (margin > 0) {
-				margin = '-' + Math.abs(margin) + 'px';
-			} else {
-				margin = '+' + Math.abs(margin) + 'px';
-			}
-			
-*/		
+
 			//If set to animate
 			if (animate) {
 				//Animate the gallery items	
