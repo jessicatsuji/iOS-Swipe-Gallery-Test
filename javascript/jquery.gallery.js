@@ -433,7 +433,14 @@
 						duration: self.options.animationDuration,
 						queue: true,
 						easing: self.options.animationEasing,
-						complete: self.options.onMoveComplete
+						complete: function() {
+							self.options.onMoveComplete();/*
+
+							var initGalleryMargin = 1 *  (margin.replace('px', ''));
+							self.setDraggable.newGalleryMargin = _calcGalleryMargin(initGalleryMargin, 0);
+							console.log(self.setDraggable.newGalleryMargin);
+*/
+						}
 					});
 					//Get the viewbox height
 					self.setViewBoxWidth();
@@ -538,6 +545,7 @@
 			
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
 				e.preventDefault();
+				console.log(e.type);
 				//Set event down, either mouse or touch
 				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 				//on mousedown, set the initial gallery margin by checking if the new gallery margin has been already set. if not, set it to whatever the margin left is, which should be 0 initially.
@@ -548,21 +556,34 @@
 				$(self.options.items, self.gallery).css('cursor', 'move');
 				//Bind to mouse move or touchmove
 				$(self.gallery).bind('mousemove touchmove', function(e) {
+					//console.log(e.type);
 					//set the move event, either mousemove or touchmove
 					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 					var pointerPos = event.pageX - initMousePos;
 					newGalleryMargin = _calcGalleryMargin(initGalleryMargin, pointerPos);
-					self.slideHorizontal(newGalleryMargin, false);
+					console.log(newGalleryMargin);
+					self.slideHorizontal(newGalleryMargin, false); 
 				});
-				//Bind to mouseup or touchend
-				$('html').bind('mouseup touchend', function() {
-					$(self.gallery).unbind('mousemove touchmove');
-					$(self.options.items, self.gallery).css('cursor', defaultCursor);
-					//calculate the new active item
-					$activeItem = _calcActiveDragItem( (1 * newGalleryMargin.replace('px', '')) );
-					//Move to the new item
-					self.moveTo($activeItem, true);
+			});
+			//Bind to mouseup or touchend
+			$('html').bind('mouseup touchend', function(e) {
+				$(self.gallery).unbind('mousemove touchmove');
+				$(self.options.items, self.gallery).css('cursor', defaultCursor);
+				
+				//calculate the new active item
+				$activeItem = _calcActiveDragItem( (1 * newGalleryMargin.replace('px', '')) );
+				//reset newGalleryMargin
+				newGalleryMargin = 0;
+				//loop through each gallery item from left to right, to get the current item and the remainderWidth
+				$.each($activeItem.prevAll(), function(index, item) {
+					//add the current item's width to the total itemsWidth
+					newGalleryMargin += $(item).outerWidth(true);
 				});
+				//add the px string
+				newGalleryMargin = '-' + newGalleryMargin + 'px';
+				
+				//Move to the new item
+				self.moveTo($activeItem, true);
 			});
 		}
 		
@@ -680,12 +701,17 @@
 			//get the remainder by calculating the difference between the total width and the margin
 			remainderWidth = itemsWidth - Math.abs(margin);
 			
+/*
 			console.log($currentItem);
 			console.log(itemsWidth);
 			console.log(remainderWidth);
-			
+*/
 			//calculate the tolerance to determine what the active item should be
-			if( (remainderWidth < ($currentItem.outerWidth(true)/2)) && !($currentItem.is(':last-child')) ) {
+			//check if the margin is positive, which means you've dragged it past the first item, stay on the first item
+			if ( (margin >= 0) && ($currentItem.is(':first-child')) ) {
+				$activeItem = $currentItem;
+			//else if the remainder width is less than half of the current item you're on, and you're not on the last item, move to the next item in the list
+			} else if( (remainderWidth < ($currentItem.outerWidth(true)/2)) && !($currentItem.is(':last-child')) ) {
 				//set the active item
 				$activeItem = $currentItem.next();
 			//else the current item has tolerance or you are on the last item
@@ -694,7 +720,7 @@
 			}
 			
 			//return the active item
-			console.log($activeItem);
+/* 			console.log($activeItem); */
 			return $activeItem;
 		}
 		
