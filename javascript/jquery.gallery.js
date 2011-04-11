@@ -421,42 +421,49 @@
 		
 		//slideHorizontal- slides to the currently active item
 		this.slideHorizontal = function(margin, animate) {
-			var duration = 0;
 			var horizontal = true;
 
 			//If set to animate
 			if (animate) {
-				//Animate the gallery items	
-				$(self.gallery).animate({
-				    marginLeft: margin
-				}, {
-					duration: self.options.animationDuration,
-					queue: true,
-					easing: self.options.animationEasing,
-					complete: self.options.onMoveComplete
-				});
-				//Get the viewbox height
-				self.setViewBoxWidth();
-				//Animate the gallery height
-				self.galleryWrapper.animate({
-					width: self.viewBoxWidth + 'px'
-				}, {
-					duration: self.options.animationDuration,
-					queue: true,
-					easing: self.options.animationEasing,
-					complete: function() {
-				    // Animation complete.
-				    }
-				});
+				if ($(self.gallery).css('-webkit-transform') === '') { //If dont have transform support, then animate the gallery margin manually
+					//Animate the gallery items	
+					$(self.gallery).animate({
+					    marginLeft: margin
+					}, {
+						duration: self.options.animationDuration,
+						queue: true,
+						easing: self.options.animationEasing,
+						complete: self.options.onMoveComplete
+					});
+					//Get the viewbox height
+					self.setViewBoxWidth();
+					//Animate the gallery height
+					self.galleryWrapper.animate({
+						width: self.viewBoxWidth + 'px'
+					}, {
+						duration: self.options.animationDuration,
+						queue: true,
+						easing: self.options.animationEasing,
+						complete: function() {
+					    // Animation complete.
+					    }
+					});
+				} else {
+					$(self.gallery).css({ //Else use transform to handle gallery movement
+	                "-webkit-transition": "all " + (self.options.animationDuration == 0 ? "0" : self.options.animationDuration + "ms"),
+	                "-webkit-transform": horizontal ?
+	                    ("translate3d(" + margin + ", 0, 0)") :
+	                    ("translate3d(0, " + margin + ", 0)") });
+				}
 			//Else simply set css margin left
 			} else {
 				self.galleryWrapper.css({width: self.viewBoxWidth + 'px'}); //Reset viewable area
 				
-				if ($(self.gallery).css('-webkit-transform') === '') { //If we are not in webkit, then rest the gallery margin manually
+				if ($(self.gallery).css('-webkit-transform') === '') { //If dont have transform support, then set the gallery margin manually
 					$(self.gallery).css('marginLeft', margin);
 				} else {
-					$(self.gallery).css({ //Else use webkit transform to handle gallery movement
-	                "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
+					$(self.gallery).css({ //Else use transform to handle gallery movement
+	                "-webkit-transition": "all 0ms",
 	                "-webkit-transform": horizontal ?
 	                    ("translate3d(" + margin + ", 0, 0)") :
 	                    ("translate3d(0, " + margin + ", 0)") });
@@ -551,6 +558,10 @@
 				$('html').bind('mouseup touchend', function() {
 					$(self.gallery).unbind('mousemove touchmove');
 					$(self.options.items, self.gallery).css('cursor', defaultCursor);
+					//calculate the new active item
+					$activeItem = _calcActiveDragItem( (1 * newGalleryMargin.replace('px', '')) );
+					//Move to the new item
+					self.moveTo($activeItem, true);
 				});
 			});
 		}
@@ -643,6 +654,48 @@
 			}
 			
 			return margin;
+		}
+	
+		//Calculates the new active item on drag release based on the current left margin
+		var _calcActiveDragItem = function(margin) {
+			//set the initial variables
+			var $allItems = $(self.options.items, self.gallery);
+			var itemsWidth = 0;
+			var remainderWidth = 0;
+			var currentItemIndex;
+			var $currentItem;
+			var $activeItem;
+			
+			//loop through each gallery item from left to right, to get the current item and the remainderWidth
+			$.each($allItems, function(index, item) {
+				//check if the total width less than the margin
+				if( itemsWidth < Math.abs(margin) ) {
+					//add the current item's width to the total itemsWidth
+					itemsWidth += $(item).outerWidth(true);
+					//set the current item to the current item to be used outside this loop
+					currentItemIndex = index;
+					$currentItem = $(item);
+				}
+			});
+			//get the remainder by calculating the difference between the total width and the margin
+			remainderWidth = itemsWidth - Math.abs(margin);
+			
+			console.log($currentItem);
+			console.log(itemsWidth);
+			console.log(remainderWidth);
+			
+			//calculate the tolerance to determine what the active item should be
+			if( (remainderWidth < ($currentItem.outerWidth(true)/2)) && !($currentItem.is(':last-child')) ) {
+				//set the active item
+				$activeItem = $currentItem.next();
+			//else the current item has tolerance or you are on the last item
+			} else {
+				$activeItem = $currentItem;
+			}
+			
+			//return the active item
+			console.log($activeItem);
+			return $activeItem;
 		}
 		
 		//Set the instance to the elements data
