@@ -376,9 +376,9 @@
 			//Check for option to animate gallery
 			if (self.options.animate) {
 				if(self.options.direction == 'horizontal') {
-					var margin = _calcElementMargin(element);
-					var newMargin = _calcGalleryMargin(0, margin);
-					self.slideHorizontal(newMargin, animate);
+					var margin = _calcElementMargin(element); //Returns elements pixel position from the left in gallery
+					var newMargin = _calcGalleryMargin(0, margin); //Returns the new gallery left margin based on the gallery starting point and the elements margin
+					self.slideHorizontal(newMargin, animate); //Move the gallery based on the new margin and an animate bool
 				} else if(self.options.direction == 'vertical') {
 					self.slideDown(self.options.itemsOffset, animate);
 				}
@@ -446,12 +446,12 @@
 				});
 			//Else simply set css margin left
 			} else {
-				self.galleryWrapper.css({width: self.viewBoxWidth + 'px'});
+				self.galleryWrapper.css({width: self.viewBoxWidth + 'px'}); //Reset viewable area
 				
 				if ($(self.gallery).css('-webkit-transform') === '') { //If we are not in webkit, then rest the gallery margin manually
 					$(self.gallery).css('marginLeft', margin);
 				} else {
-					$(self.gallery).css({ //Else use webkit transform
+					$(self.gallery).css({ //Else use webkit transform to handle gallery movement
 	                "-webkit-transition": "all " + (duration == 0 ? "0" : duration + "ms"),
 	                "-webkit-transform": horizontal ?
 	                    ("translate3d(" + margin + ", 0, 0)") :
@@ -527,7 +527,7 @@
 			
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
 				e.preventDefault();
-				//Set event, either mouse or touch
+				//Set event down, either mouse or touch
 				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 				//on mousedown, set the initial gallery margin by checking if the new gallery margin has been already set. if not, set it to whatever the margin left is, which should be 0 initially.
 				var initGalleryMargin = (newGalleryMargin == undefined) ? (1 * $(self.gallery).css('marginLeft').replace('px', '')) : (1 * newGalleryMargin.replace('px', '')); //Initial gallery position
@@ -537,6 +537,7 @@
 				$(self.options.items, self.gallery).css('cursor', 'move');
 				//Bind to mouse move or touchmove
 				$(self.gallery).bind('mousemove touchmove', function(e) {
+					//set the move event, either mousemove or touchmove
 					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 					var pointerPos = event.pageX - initMousePos;
 					newGalleryMargin = _calcGalleryMargin(initGalleryMargin, pointerPos);
@@ -589,19 +590,17 @@
 		var _calcGalleryMargin = function(initGalleryMargin, pointerPos) {
 			
 			var newMargin; //The new margin to return
-/*
+			//check if pointerPosition is positive
 			if (pointerPos > 0) {
+				//new margin moves to the right
 				newMargin = (initGalleryMargin + pointerPos) + 'px';
+			//else pointerPosition is less than 0 and check if the initial gallery margin is greater than 0
 			} else if ( initGalleryMargin >= 0 ) {
+				//new margin moves to the left because pointerPos is negative
 				newMargin = (initGalleryMargin + pointerPos) + 'px';
+			//else pointerPosition is negative and initial gallery margin is negative
 			} else {
-				newMargin = "-" + Math.abs(initGalleryMargin + pointerPos) + 'px';
-			}
-*/			if (pointerPos > 0) {
-				newMargin = (initGalleryMargin + pointerPos) + 'px';
-			} else if ( initGalleryMargin >= 0 ) {
-				newMargin = (initGalleryMargin + pointerPos) + 'px';
-			} else {
+				//new margin moves left and past the left edge of the gallery
 				newMargin = "-" + Math.abs(initGalleryMargin + pointerPos) + 'px';
 			}
 			return newMargin;
@@ -609,23 +608,33 @@
 		
 		//Calculates the elements left margin based on its position realitive to its siblings
 		var _calcElementMargin = function(element) {
+			//set the default margin
 			var margin = 0;
+			//get all the previous items before the original active item
 			var prevItems = $(' .active', self.gallery).prevAll(self.options.items);
+			//get the offset from the options object
 			var offset = self.options.itemsOffset;
 			
+			//get the total number of all the previous items
 			var prevItemsTotal = prevItems.length;
+			//set the total number to factor in the offset
 			prevItemsTotal = (offset > 0) ? prevItemsTotal - offset : prevItemsTotal;
 			
+			//loop through each previous item and use the indext to determine which item Width to add to the total margin
 			$.each(prevItems, function(index, item) {
+				//if the item you are on is less than the previous item total, add its margin to the total margin
 				if (index < prevItemsTotal) {
 					//get width
 					margin += $(self.options.items, self.gallery).eq(index).outerWidth(true);
 				}
 			});
 			
+			//if margin is greater than 0
 			if (margin > 0) {
+				//margin is negative
 				margin = '-1' * Math.abs(margin);
 			} else {
+				//margin is positive
 				margin = Math.abs(margin);
 			}
 			
