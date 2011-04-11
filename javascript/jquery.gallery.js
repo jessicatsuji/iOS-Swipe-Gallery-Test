@@ -64,6 +64,7 @@
 		
 		//Defaults
 		this.defaults = {
+			defaultItem: 1, //The starting item. if not required, set to 0 or false
 			items: 'li', //Specify item (can be a class)
 			itemsVisible: 3, //# of items visible
 			itemsIncrement: 1, //# of items to move by
@@ -174,6 +175,9 @@
 			
 			//Check for pagination functionality boolean
 			if( self.options.pagination ) self.createPagination();
+			
+			//Check initial moveTo
+			if( self.options.defaultItem ) self.moveTo(self.options.defaultItem, false);
 
 			//Check for auto rotate functionality boolean
 			if( self.options.autoRotate ) self.setAutomaticRotator();
