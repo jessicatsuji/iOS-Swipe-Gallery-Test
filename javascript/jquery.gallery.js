@@ -343,7 +343,7 @@
 		}
 
 		//moveTo method- resets the active item. Takes an object, number, or 'next' & 'back'
-		this.moveTo = function(item, animate) {
+		this.moveTo = function(item, animate, duration) {
 			var animate = (animate == undefined) ? true : animate;
 			var element;
 			switch(typeof(item)){
@@ -382,7 +382,7 @@
 				if(self.options.direction == 'horizontal') {
 					var margin = _calcElementMargin(element); //Returns elements pixel position from the left in gallery
 					var newMargin = _calcGalleryMargin(0, margin); //Returns the new gallery left margin based on the gallery starting point and the elements margin
-					self.slideHorizontal(newMargin, animate); //Move the gallery based on the new margin and an animate bool
+					self.slideHorizontal(newMargin, animate, duration); //Move the gallery based on the new margin and an animate bool
 				} else if(self.options.direction == 'vertical') {
 					self.slideDown(self.options.itemsOffset, animate);
 				}
@@ -420,9 +420,10 @@
 		}
 		
 		//slideHorizontal- slides to the currently active item
-		this.slideHorizontal = function(margin, animate) {
+		this.slideHorizontal = function(margin, animate, duration) {
 			var horizontal = true;
-
+			console.log(duration);
+			var animateDuration = (duration == undefined) ? self.options.animationDuration : duration;
 			//If set to animate
 			if (animate) {
 				if ($(self.gallery).css('-webkit-transform') === '') { //If dont have transform support, then animate the gallery margin manually
@@ -430,7 +431,7 @@
 					$(self.gallery).animate({
 					    marginLeft: margin
 					}, {
-						duration: self.options.animationDuration,
+						duration: animateDuration,
 						queue: true,
 						easing: self.options.animationEasing,
 						complete: function() {
@@ -448,7 +449,7 @@
 					self.galleryWrapper.animate({
 						width: self.viewBoxWidth + 'px'
 					}, {
-						duration: self.options.animationDuration,
+						duration: animateDuration,
 						queue: true,
 						easing: self.options.animationEasing,
 						complete: function() {
@@ -457,7 +458,7 @@
 					});
 				} else {
 					$(self.gallery).css({ //Else use transform to handle gallery movement
-	                "-webkit-transition": "all " + (self.options.animationDuration == 0 ? "0" : self.options.animationDuration + "ms"),
+	                "-webkit-transition": "all " + (animateDuration == 0 ? "0" : animateDuration + "ms"),
 	                "-webkit-transform": horizontal ?
 	                    ("translate3d(" + margin + ", 0, 0)") :
 	                    ("translate3d(0, " + margin + ", 0)") });
@@ -542,31 +543,43 @@
 			//Setup default states
 			var defaultCursor = $(self.options.items, self.gallery).css('cursor');
 			var newGalleryMargin;
+			var timerInterval;
+			var timer;
+			var startX;
+			var velocity;
 			
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
 				e.preventDefault();
-				console.log(e.type);
+				timer = 0;
+				timerInterval = setInterval(function() {
+					timer++;
+				}, 1);
 				//Set event down, either mouse or touch
 				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 				//on mousedown, set the initial gallery margin by checking if the new gallery margin has been already set. if not, set it to whatever the margin left is, which should be 0 initially.
 				var initGalleryMargin = (newGalleryMargin == undefined) ? (1 * $(self.gallery).css('marginLeft').replace('px', '')) : (1 * newGalleryMargin.replace('px', '')); //Initial gallery position
 				//Initial mouse or touch position
             	var initMousePos = event.pageX;
+            	startX = event.pageX;
 				//Set the cursor				
 				$(self.options.items, self.gallery).css('cursor', 'move');
 				//Bind to mouse move or touchmove
 				$(self.gallery).bind('mousemove touchmove', function(e) {
-					//console.log(e.type);
 					//set the move event, either mousemove or touchmove
 					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
 					var pointerPos = event.pageX - initMousePos;
 					newGalleryMargin = _calcGalleryMargin(initGalleryMargin, pointerPos);
-					console.log(newGalleryMargin);
 					self.slideHorizontal(newGalleryMargin, false); 
 				});
 			});
 			//Bind to mouseup or touchend
 			$('html').bind('mouseup touchend', function(e) {
+				e.preventDefault();
+				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
+				
+				clearInterval(timerInterval);
+				velocity = (Math.abs(timer/startX-event.pageX))*1;
+				
 				$(self.gallery).unbind('mousemove touchmove');
 				$(self.options.items, self.gallery).css('cursor', defaultCursor);
 				
@@ -583,7 +596,7 @@
 				newGalleryMargin = '-' + newGalleryMargin + 'px';
 				
 				//Move to the new item
-				self.moveTo($activeItem, true);
+				self.moveTo($activeItem, true, velocity);
 			});
 		}
 		
