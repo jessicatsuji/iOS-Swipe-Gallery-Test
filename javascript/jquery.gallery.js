@@ -434,14 +434,7 @@
 						duration: animateDuration,
 						queue: true,
 						easing: self.options.animationEasing,
-						complete: function() {
-							self.options.onMoveComplete();/*
-
-							var initGalleryMargin = 1 *  (margin.replace('px', ''));
-							self.setDraggable.newGalleryMargin = _calcGalleryMargin(initGalleryMargin, 0);
-							console.log(self.setDraggable.newGalleryMargin);
-*/
-						}
+						complete: self.options.onMoveComplete
 					});
 					//Get the viewbox height
 					self.setViewBoxWidth();
@@ -546,6 +539,7 @@
 			var timerInterval;
 			var timer;
 			var startX;
+			var endX;
 			var velocity;
 			
 			$(self.gallery).bind('mousedown touchstart', function(e) { //Bind mousedown to parent of items
@@ -567,6 +561,7 @@
 				$(self.gallery).bind('mousemove touchmove', function(e) {
 					//set the move event, either mousemove or touchmove
 					var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
+					endX = event.pageX;
 					var pointerPos = event.pageX - initMousePos;
 					newGalleryMargin = _calcGalleryMargin(initGalleryMargin, pointerPos);
 					self.slideHorizontal(newGalleryMargin, false); 
@@ -576,9 +571,21 @@
 			$('html').bind('mouseup touchend', function(e) {
 				e.preventDefault();
 				var event = (typeof e.originalEvent.touches != 'undefined') ? e.originalEvent.touches[0] : e;
-				
 				clearInterval(timerInterval);
-				velocity = (Math.abs(timer/startX-event.pageX))*1;
+				//get the absolute value of the distance travelled
+				var distance = Math.abs(startX-endX);
+				//if the distance too small, set it to higher
+				distance = (distance < 50) ? 50 : distance;
+				//if the distance is too small and the time is too long, also set the timer to shorter
+				timer = ((distance < 100) && (timer > 20)) ? 20 : timer;
+				//if the distance is too small time is too long, set the time to shorter
+				timer = ((distance < 300) && (timer > 150)) ? 150 : timer;
+/*
+				console.log(timer);
+				console.log(distance);
+*/
+				velocity = 2000/(distance/timer);
+/* 				console.log(velocity); */
 				
 				$(self.gallery).unbind('mousemove touchmove');
 				$(self.options.items, self.gallery).css('cursor', defaultCursor);
