@@ -451,7 +451,7 @@
 					});
 				} else {
 					$(self.gallery).css({ //Else use transform to handle gallery movement
-	                "-webkit-transition": "all " + (animateDuration == 0 ? "0" : animateDuration + "ms"),
+	                "-webkit-transition": "all " + (animateDuration == 0 ? "0" : animateDuration + "ms") + " cubic-bezier(0.33, 0.66, 0.66, 1)",
 	                "-webkit-transform": horizontal ?
 	                    ("translate3d(" + margin + ", 0, 0)") :
 	                    ("translate3d(0, " + margin + ", 0)") });
@@ -464,7 +464,7 @@
 					$(self.gallery).css('marginLeft', margin);
 				} else {
 					$(self.gallery).css({ //Else use transform to handle gallery movement
-	                "-webkit-transition": "all 0ms",
+	                "-webkit-transition": "all 0ms cubic-bezier(0.33, 0.66, 0.66, 1)",
 	                "-webkit-transform": horizontal ?
 	                    ("translate3d(" + margin + ", 0, 0)") :
 	                    ("translate3d(0, " + margin + ", 0)") });
@@ -584,7 +584,7 @@
 				console.log(timer);
 				console.log(distance);
 */
-				velocity = 2000/(distance/timer);
+				velocity = 4000/(distance/timer);
 /* 				console.log(velocity); */
 				
 				$(self.gallery).unbind('mousemove touchmove');
